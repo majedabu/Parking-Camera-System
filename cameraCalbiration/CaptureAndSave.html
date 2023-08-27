@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Camera with HD Square Capture and Save</title>
+</head>
+<body>
+    <div>
+        <video id="vid"></video>
+    </div>
+    <br>
+    <button id="startButton">
+        Start Webcam
+    </button>
+    <button id="captureButton" disabled>
+        Capture HD Square Picture
+    </button>
+    <button id="saveButton" disabled>
+        Save Picture
+    </button>
+
+    <canvas id="canvas" style="display: none;"></canvas>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            let startButton = document.getElementById("startButton");
+            let captureButton = document.getElementById("captureButton");
+            let saveButton = document.getElementById("saveButton");
+            let video = document.getElementById("vid");
+            let canvas = document.getElementById("canvas");
+            let mediaDevices = navigator.mediaDevices;
+
+            startButton.addEventListener("click", () => {
+                mediaDevices
+                    .getUserMedia({
+                        video: {
+                            width: { ideal: 3840 },
+                            height: { ideal: 2160 }
+                        },
+                        audio: true,
+                    })
+                    .then((stream) => {
+                        video.srcObject = stream;
+                        video.addEventListener("loadedmetadata", () => {
+                            video.play();
+                            captureButton.disabled = false;
+                            startButton.disabled = true;
+                        });
+                    })
+                    .catch(alert);
+            });
+
+            captureButton.addEventListener("click", () => {
+                // Set canvas size to square dimensions
+				dimension_width = 3840;
+				dimension_height = 2160;
+                canvas.width = dimension_width;
+                canvas.height = dimension_height;
+                
+                const context = canvas.getContext("2d");
+
+                // Calculate scaling factors
+                const scale = Math.max(video.videoWidth / dimension_width, video.videoHeight / dimension_height);
+                const xOffset = (video.videoWidth - dimension_width * scale) / 2;
+                const yOffset = (video.videoHeight - dimension_height * scale) / 2;
+
+                // Draw the video frame onto the canvas
+                context.drawImage(video, xOffset, yOffset, dimension_width * scale, dimension_height * scale, 0, 0, dimension_width, dimension_height);
+                
+                saveButton.disabled = false;
+            });
+
+            saveButton.addEventListener("click", () => {
+                let image = canvas.toDataURL("image/png");
+                let link = document.createElement("a");
+                link.href = image;
+                link.download = "captured_image.png";
+                link.click();
+            });
+        });
+    </script>
+
+    <style>
+        div {
+            width: 1280px;
+            height: 1280px;
+            border: 2px solid black;
+            position: relative;
+        }
+
+        video {
+            width: 1280px;
+            height: 1280px;
+        }
+    </style>
+</body>
+</html>
