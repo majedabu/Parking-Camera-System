@@ -2,7 +2,7 @@
 
 ## _equimpent to prepare:_
 
- - (4) ELP 8mp USB Camera Wide Angle Fisheye Lens 185 Degree 4K [amazon](https://www.amazon.com/-/he/dp/B01HD1V3UO?ref=ppx_yo2ov_dt_b_product_details&th=1)
+ - (4) ELP 8mp USB Camera Wide Angle Fisheye Lens 180 Degree 4K [amazon](https://www.amazon.com/-/he/dp/B01HD1V3UO?ref=ppx_yo2ov_dt_b_product_details&th=1)
  - (4) papers of checkboard white-black (5X5), size 100cmX100cm the size of each black/white square is 20cmX20cm.
 
 
@@ -27,8 +27,12 @@
 |camera matrix 3x3 output (focal length and center) + Distortion Coefficients 1x4 vector.|
 |<img style="margin:0px auto;display:block" src=".\cameraCalbiration\cameraCalbiration.png"/>|
 
-# image undistortion
 
-for our case we need to scale and shift the image to catch the corners of each camera framme we cant loss any pixel, using the defauilt openCV fisheye undistortion is problamtic because it crop the image and show region that OpenCv think is fine.
-to overlap this issue we use can use "cv2.fisheye.initUndistortRectifyMap" that can perform scaling and shift(translation). we got an new intrinsc matrix 
-then we use remap.
+# Image Undistortion and Corner Capture
+In our case, we require precise control over the image transformation to ensure we capture the corners of each camera frame without losing any pixels. The default OpenCV fisheye undistortion process can be problematic as it tends to crop the image and display a region that OpenCV deems suitable.
+To address this issue, we leverage the "cv2.fisheye.initUndistortRectifyMap" function, which offers the capability to perform both scaling and shifting (translation). <br/> By employing this function, we obtain a new intrinsic matrix tailored to our specific needs. Subsequently, we apply this transformation using the "remap" function.
+This approach allows us to maintain control over the scaling and translation of the image, ensuring that we capture all the critical corners while preserving all the pixels in the process.
+
+ - script : [extractFisheyeCameraIntrinsics.py](https://github.com/majedabu/Parking-Camera-System/blob/main/cameraCalbiration/extractFisheyeCameraIntrinsics%20.py)
+
+
