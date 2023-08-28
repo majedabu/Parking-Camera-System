@@ -37,13 +37,13 @@ This approach allows us to maintain control over the scaling and translation of 
 |   |   |
 |:-:|:-:|
 |front fisheye image |front undistorted defualt|
-|<img style="margin:0px auto;display:block" width=350 src=".\BirdEyeSystem\imgs\front.png"/>|<img style="margin:0px auto;display:block" width=350 src=".\BirdEyeSystem\imgs\test\front_undistorted_default.png"/>|
+|<img style="margin:0px auto;display:block" width=500 src=".\BirdEyeSystem\imgs\front.png"/>|<img style="margin:0px auto;display:block" width=500 src=".\BirdEyeSystem\imgs\tests\front_undistorted_default.png"/>|
 
  - scaling and translation to catch the coreners(missing pixels):
 
 |   |   |
 |:-:|:-:|
 |front - scale (0.5,0.5)|front - scale(0.5,0.5) & shift (200,0)|
-|<img style="margin:0px auto;display:block" width=250 src=".\BirdEyeSystem\imgs\test\front_scaleXY_0.5.png"/>|<img style="margin:0px auto;display:block" width=250 src=".\BirdEyeSystem\imgs\test\front_scaleXY_0.5_shiftX_200.png"/>|
+|<img style="margin:0px auto;display:block" width=500 src=".\BirdEyeSystem\imgs\tests\front_scaleXY_0.5.png"/>|<img style="margin:0px auto;display:block" width=500 src=".\BirdEyeSystem\imgs\tests\front_scaleXY_0.5_shiftX_200.png"/>|
 
 
