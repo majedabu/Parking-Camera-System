@@ -24,7 +24,11 @@
 
 |   |
 |:-:|
-|camera matrix output (focal length and center) + Distortion Coefficients|
+|camera matrix 3x3 output (focal length and center) + Distortion Coefficients 1x4 vector.|
 |<img style="margin:0px auto;display:block" src=".\cameraCalbiration\cameraCalbiration.png"/>|
 
 # image undistortion
+
+for our case we need to scale and shift the image to catch the corners of each camera framme we cant loss any pixel, using the defauilt openCV fisheye undistortion is problamtic because it crop the image and show region that OpenCv think is fine.
+to overlap this issue we use can use "cv2.fisheye.initUndistortRectifyMap" that can perform scaling and shift(translation). we got an new intrinsc matrix 
+then we use remap.
