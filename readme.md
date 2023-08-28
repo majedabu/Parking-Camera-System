@@ -9,8 +9,8 @@
 # camera calibration:
 	
 1. connect the camera to the pc and capture multiple images of the checkerboard pattern from different angles and positions.
- - examples exists in [cameraCalbiration\imgs](https://github.com/majedabu/Parking-Camera-System/tree/main/cameraCalbiration/imgs)
- - script : [CaptureAndSave.html](https://github.com/majedabu/Parking-Camera-System/blob/main/cameraCalbiration/CaptureAndSave.html)
+     - examples exists in [cameraCalbiration\imgs](https://github.com/majedabu/Parking-Camera-System/tree/main/cameraCalbiration/imgs)
+     - script : [CaptureAndSave.html](https://github.com/majedabu/Parking-Camera-System/blob/main/cameraCalbiration/CaptureAndSave.html)
 
 |   |   |   |
 |:-:|:-:|:-:|
@@ -18,10 +18,8 @@
 |<img style="margin:0px auto;display:block" width=250 src=".\cameraCalbiration\imgs\captured_image (35).png"/>|<img style="margin:0px auto;display:block" width=250 src=".\cameraCalbiration\imgs\captured_image (23).png"/>|<img style="margin:0px auto;display:block" width=250 src=".\cameraCalbiration\imgs\captured_image (19).png"/>|
 
 2. calbirate the camera  using OpenCV calibration method for fisheye cameras.
- - script : [extractFisheyeCameraIntrinsics.py](https://github.com/majedabu/Parking-Camera-System/blob/main/cameraCalbiration/extractFisheyeCameraIntrinsics%20.py)
-
- <br/>
-
+     - script : [extractFisheyeCameraIntrinsics.py](https://github.com/majedabu/Parking-Camera-System/blob/main/cameraCalbiration/extractFisheyeCameraIntrinsics%20.py)
+    
 |   |
 |:-:|
 |camera matrix 3x3 output (focal length and center) + Distortion Coefficients 1x4 vector.|
@@ -33,6 +31,19 @@ In our case, we require precise control over the image transformation to ensure 
 To address this issue, we leverage the "cv2.fisheye.initUndistortRectifyMap" function, which offers the capability to perform both scaling and shifting (translation). <br/> By employing this function, we obtain a new intrinsic matrix tailored to our specific needs. Subsequently, we apply this transformation using the "remap" function.
 This approach allows us to maintain control over the scaling and translation of the image, ensuring that we capture all the critical corners while preserving all the pixels in the process.
 
- - script : [extractFisheyeCameraIntrinsics.py](https://github.com/majedabu/Parking-Camera-System/blob/main/cameraCalbiration/extractFisheyeCameraIntrinsics%20.py)
+- script : [BirdEyeSystem.py](https://github.com/majedabu/Parking-Camera-System/blob/main/BirdEyeSystem/BirdEyeSystem.py)
+- ```sh
+    	command: BirdEyeSystem.py -undistore
+|   |   |
+|:-:|:-:|
+|front fisheye image |front undistorted defualt|
+|<img style="margin:0px auto;display:block" width=350 src=".\BirdEyeSystem\imgs\front.png"/>|<img style="margin:0px auto;display:block" width=350 src=".\BirdEyeSystem\imgs\test\front_undistorted_default.png"/>|
+
+ - scaling and translation to catch the coreners(missing pixels):
+
+|   |   |
+|:-:|:-:|
+|front - scale (0.5,0.5)|front - scale(0.5,0.5) & shift (200,0)|
+|<img style="margin:0px auto;display:block" width=250 src=".\BirdEyeSystem\imgs\test\front_scaleXY_0.5.png"/>|<img style="margin:0px auto;display:block" width=250 src=".\BirdEyeSystem\imgs\test\front_scaleXY_0.5_shiftX_200.png"/>|
 
 

@@ -9,10 +9,10 @@ class BirdEyeSystem:
 
     def __init__(self):
 
-        self.ParkingCameraLeft = ParkingCamera("left", "imgs2/left.png", [1.0, 1.0], [300, 0])
-        self.ParkingCameraRight = ParkingCamera("right", "imgs2/right.png",[0.65, 0.65], [0, 0])
-        self.ParkingCameraFront = ParkingCamera("front", "imgs2/front.png" ,[0.65, 0.65], [0, 0])
-        self.ParkingCameraRear = ParkingCamera("rear", "imgs2/rear.png",[0.65, 0.65], [0, 0])
+        self.ParkingCameraLeft = ParkingCamera("left", "imgs/left.png", [1.0, 1.0], [300, 0])
+        self.ParkingCameraRight = ParkingCamera("right", "imgs/right.png",[0.65, 0.65], [0, 0])
+        self.ParkingCameraFront = ParkingCamera("front", "imgs/front.png" ,[0.65, 0.65], [0, 0])
+        self.ParkingCameraRear = ParkingCamera("rear", "imgs/rear.png",[0.65, 0.65], [0, 0])
         self.ParkingCameraList = [self.ParkingCameraLeft, self.ParkingCameraRight, self.ParkingCameraFront, self.ParkingCameraRear]
         self.undistorParkingCamerasDict = {}
 
