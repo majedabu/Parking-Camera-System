@@ -8,7 +8,7 @@ equimpent to prepare:
 # camera calibration:
 	
 1. connect the camera to the pc and capture multiple images of the checkerboard pattern from different angles and positions.
-	examples exists in cameraCalbiration\imgs
+	examples exists in [cameraCalbiration\imgs](https://github.com/majedabu/Parking-Camera-System/tree/main/cameraCalbiration/imgs)
 
 |   |   |   |
 |:-:|:-:|:-:|
@@ -16,9 +16,13 @@ equimpent to prepare:
 |<img style="margin:0px auto;display:block" width=250 src=".\cameraCalbiration\imgs\captured_image (35).png"/>|<img style="margin:0px auto;display:block" width=250 src=".\cameraCalbiration\imgs\captured_image (23).png"/>|<img style="margin:0px auto;display:block" width=250 src=".\cameraCalbiration\imgs\captured_image (19).png"/>|
 script : [CaptureAndSave.html](https://github.com/majedabu/Parking-Camera-System/blob/main/cameraCalbiration/CaptureAndSave.html)
 
+<br/>
 
 2. calbirate the camera  using OpenCV calibration method for fisheye cameras.
-	<img style="margin:0px auto;display:block" width=500 src=".\cameraCalbiration\cameraCalbiration.png"/>
-	script : [extractFisheyeCameraIntrinsics.py](https://github.com/majedabu/Parking-Camera-System/blob/main/cameraCalbiration/extractFisheyeCameraIntrinsics%20.py)
+<br/>
+| |
+|<img style="margin:0px auto;display:block" width=500 src=".\cameraCalbiration\cameraCalbiration.png"/>|
+<br/>
+script : [extractFisheyeCameraIntrinsics.py](https://github.com/majedabu/Parking-Camera-System/blob/main/cameraCalbiration/extractFisheyeCameraIntrinsics%20.py)
 
 # image undistortion
