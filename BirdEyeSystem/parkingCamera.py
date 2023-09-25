@@ -1,33 +1,38 @@
 import cv2
 import numpy as np
-import os
+from parameters import cameraMatrix, distCoeffs, projectShapes, readImage
 
-
-
-#update the camera matrix wnad distortion coff you got from the calbiration part.
-cameraMatrix = np.array([[1.16194631e+03, 0.00000000e+00, 1.91353747e+03],
-                          [0.00000000e+00, 1.16326338e+03, 1.00390359e+03],
-                          [0.00000000e+00, 0.00000000e+00, 1.00000000e+00]])
-
-distCoeffs = np.array([-0.01669945, -0.08312363, 0.07524174, -0.02321733])
 
 
 class ParkingCamera:
 
     def __init__(self, name, pathToImage, scale=[1.0, 1.0], shift=[0, 0]):
 
-        self.name = name
+        self.cameraName = name
         self.cameraMatrix = cameraMatrix
         self.distCoeffs = distCoeffs
         self.scale = scale
         self.shift = shift
         self.imagePath = pathToImage
-        self.image = cv2.imread(pathToImage)
+        self.image = readImage(pathToImage)
         self.resolution = self.image.shape[:2]
-        self.initUndistortRectifyMap()
+        self.projectMatrix = None
+        self.projectShape = projectShapes[name]
+        self.InitUndistortRectifyMap()
 
 
-    def initUndistortRectifyMap(self):
+    def FlipImage(self, image):
+
+        if self.cameraName == "rear":
+            return image.copy()[::-1, ::-1, :]
+        elif self.cameraName == "left":
+            return cv2.transpose(image)[::-1]
+        elif self.cameraName == "front":
+            return image.copy()
+        else:#right
+            return np.flip(cv2.transpose(image), 1)
+
+    def InitUndistortRectifyMap(self):
         """
         Initializes the undistortion and rectification map for fisheye camera calibration.
 
@@ -46,7 +51,7 @@ class ParkingCamera:
             self.cameraMatrix, self.distCoeffs, np.eye(3), newMatrix, (width, height), cv2.CV_16SC2)
 
 
-    def undistort(self):
+    def Undistort(self):
         """
         Undistorts a fisheye-distorted image using precomputed undistortion and rectification maps.
 
@@ -59,3 +64,6 @@ class ParkingCamera:
         return cv2.remap(self.image, *self.UndistortRectifyMap, interpolation=cv2.INTER_LINEAR,
                          borderMode=cv2.BORDER_CONSTANT)
 
+    def Project(self, image):
+        result = cv2.warpPerspective(image, self.projectMatrix, self.projectShape)
+        return result
