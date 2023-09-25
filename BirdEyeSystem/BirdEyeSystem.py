@@ -74,7 +74,7 @@ class BirdEyeSystem:
             imgPath = self.ParkingCameraList[name].imagePath
 
             #step 3: Select points for perspective transformation
-            selectedPoints = np.float32(select_points_and_draw_lines(undistorted, imgPath.replace(".png", "_selectedPoints.png"), isNeedToSave))
+            selectedPoints = np.float32(select_points_and_draw_lines(undistorted, outputPath + name + "_selectedPoints.png", isNeedToSave))
 
             #step 4: define destination points for perspective transformation
             destinationPoints = np.float32(projectionPointsPerCam[name])
