@@ -33,6 +33,7 @@ distCoeffs = np.array([-0.01669945, -0.08312363, 0.07524174, -0.02321733])
 shift_w = 150
 shift_h = 150
 
+mirrorExtra = 5
 
 # size of the gap between the calibration pattern and the car
 gabBetweenCarAndCheckboardLeftOrRight = 22

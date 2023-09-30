@@ -3,8 +3,15 @@ from parkingCamera import ParkingCamera
 import numpy as np
 import argparse
 from point_selector import select_points_and_draw_lines
-from parameters import camerasPath, total_w, total_h, xl, xr, yt, yb, projectionPointsPerCam, carImagePath, outputPath, readImage
+from parameters import camerasPath, total_w, total_h, xl, xr, yt, yb, projectionPointsPerCam, carImagePath, outputPath, readImage, mirrorExtra
 import random
+
+
+
+
+isNeedToSave = False
+applyLuminance = False
+showLines = False
 
 class BirdEyeSystem:
 
@@ -13,7 +20,7 @@ class BirdEyeSystem:
         self.ParkingCameraLeft = ParkingCamera("left", camerasPath["left"], [0.5, 0.5], [150, -100])
         self.ParkingCameraRight = ParkingCamera("right", camerasPath["right"], [0.5, 0.5], [-150, 0])
         self.ParkingCameraFront = ParkingCamera("front", camerasPath["front"], [0.5, 0.5], [100, 0])
-        self.ParkingCameraRear = ParkingCamera("rear", camerasPath["rear"], [0.5, 0.5], [50, 0])
+        self.ParkingCameraRear = ParkingCamera("rear", camerasPath["rear"], [0.5, 0.5], [-50, 0])
 
         self.ParkingCameraList = {
             "left": self.ParkingCameraLeft,
@@ -55,7 +62,7 @@ class BirdEyeSystem:
             self.undistortedParkingCamerasDict[parkingCamera.cameraName] = res
 
 
-    def ProjectParkingCameras(self, isNeedToSave=False):
+    def ProjectParkingCameras(self):
         """
         Projects parking cameras to a bird's eye view using perspective transformation.
 
@@ -111,7 +118,7 @@ class BirdEyeSystem:
         for imgName, image in self.projectedWithFlip.items():
 
             factor = self.averageLuminance / self.averageLuminancePerImage[imgName]
-
+            factor = 1
             print(imgName, factor)
             # Convert BGR to LAB
             lab_image = cv2.cvtColor(image, cv2.COLOR_BGR2LAB)
@@ -132,9 +139,9 @@ class BirdEyeSystem:
 
 
 
-    def TopView(self, isNeedToSave=False, applyLuminance=False):
+    def TopView(self):
 
-        self.ProjectParkingCameras(isNeedToSave=isNeedToSave)
+        self.ProjectParkingCameras()
         for cameraName, projected_ in self.projectedParkingCamerasDict.items():
             self.projectedWithFlip[cameraName] = self.ParkingCameraList[cameraName].FlipImage(projected_)
 
@@ -183,7 +190,7 @@ class BirdEyeSystem:
         elif direction == "R":
             return self.image[yt:yb, xr:]
         elif direction == "C":
-            return self.image[yt:yb, xl:xr]
+            return self.image[yt:yb, xl-mirrorExtra:xr+mirrorExtra]
         else:
             raise ValueError("Invalid direction: {}".format(direction))
 
@@ -200,10 +207,63 @@ class BirdEyeSystem:
         np.copyto(self.crop_by_direction("L"), self.crop_image(left, "LM"))
         np.copyto(self.crop_by_direction("R"), self.crop_image(right, "RM"))
 
-        np.copyto(self.crop_by_direction("FL"), self.AverageMergeTwoImage(self.crop_image(front, "FI"), self.crop_image(left, "LI"), 0.4, 180, 0.4, 160))
-        np.copyto(self.crop_by_direction("FR"), self.AverageMergeTwoImage(self.crop_image(front, "FII"), self.crop_image(right, "RII"), -0.4, yt-10, -0.4, yt-11))
-        np.copyto(self.crop_by_direction("BL"), self.AverageMergeTwoImage(self.crop_image(left, "LIII"), self.crop_image(rear, "BIII"),  -0.4, 115, -0.4, 95))
-        np.copyto(self.crop_by_direction("BR"), self.AverageMergeTwoImage(self.crop_image(right, "RIV"), self.crop_image(rear, "BIV"), 0.4, 15, 0.4, 0))
+        np.copyto(self.crop_by_direction("FL"), self.GaussianMergeTwoImage(self.crop_image(front, "FI"), self.crop_image(left, "LI"), 0.4, 180, 0.4, 150))
+        np.copyto(self.crop_by_direction("FR"), self.GaussianMergeTwoImage(self.crop_image(front, "FII"), self.crop_image(right, "RII"), -0.4, yt+5, -0.4, yt-25))
+        np.copyto(self.crop_by_direction("BL"), self.GaussianMergeTwoImage(self.crop_image(left, "LIII"), self.crop_image(rear, "BIII"),  -0.35, 125, -0.35, 95))
+        np.copyto(self.crop_by_direction("BR"), self.GaussianMergeTwoImage(self.crop_image(right, "RIV"), self.crop_image(rear, "BIV"), 0.35, 30, 0.35, 0))
+
+    def GaussianMergeTwoImage(self, imA, imB, m1, b1, m2, b2, sigma=10):
+        # Initialize an array with the same dimensions as imA
+        merged_image = np.zeros_like(imA)
+
+        for i in range(imA.shape[0]):
+            for j in range(imA.shape[1]):
+                # Calculate the y positions on the two lines
+                y_linear2 = int(m1 * j + b1)
+                y_linear1 = int(m2 * j + b2)
+
+                if i < y_linear1:
+                    # If above line 1, choose pixel from imA
+                    if not np.all(imA[i, j] == [0, 0, 0]):
+                        merged_image[i, j] = imA[i, j]
+
+                elif i > y_linear2:
+                    # If below line 2, choose pixel from imB
+                    if not np.all(imB[i, j] == [0, 0, 0]):
+                        merged_image[i, j] = imB[i, j]
+
+                else:
+                    dist1 = abs(i - y_linear1)
+                    dist2 = abs(i - y_linear2)
+
+                    weight1 = np.exp(-0.5 * (dist1 / sigma) ** 2)
+                    weight2 = np.exp(-0.5 * (dist2 / sigma) ** 2)
+
+                    total_weight = weight1 + weight2
+
+                    if not np.all(imA[i, j] == [0, 0, 0]) and not np.all(imB[i, j] == [0, 0, 0]):
+                        merged_image[i, j] = ((imA[i, j] * weight1 + imB[i, j] * weight2) / total_weight).astype(
+                            np.uint8)
+                    elif not np.all(imA[i, j] == [0, 0, 0]):
+                        merged_image[i, j] = imA[i, j]
+                    elif not np.all(imB[i, j] == [0, 0, 0]):
+                        merged_image[i, j] = imB[i, j]
+
+                if np.all(merged_image[i, j] == [0, 0, 0]):
+                    if not np.all(imA[i, j] == [0, 0, 0]):
+                        merged_image[i, j] = imA[i, j]
+                    else:
+                        merged_image[i, j] = imB[i, j]
+
+                if showLines:
+                    if i == y_linear2:
+                        merged_image[i, j] = [255, 0, 0]
+
+                    elif i == y_linear1:
+                        merged_image[i, j] = [0, 255, 0]
+
+        return merged_image
+
 
 
     def AverageMergeTwoImage(self, imA, imB, m1, b1, m2, b2):
@@ -229,10 +289,12 @@ class BirdEyeSystem:
                         merged_image[i, j] = imB[i, j]
 
                 else:
+
+                    X = (i - y_linear1) / (y_linear2 - y_linear1)
                     # For overlapping region, perform weighted average
                     if not np.all(imA[i, j] == [0, 0, 0]):
                         if not np.all(imB[i, j] == [0, 0, 0]):
-                            merged_image[i, j] = (imA[i, j] * 0.5 + imB[i, j] * 0.5).astype(np.uint8)
+                            merged_image[i, j] = (imA[i, j] * (1-X) + imB[i, j] * (X)).astype(np.uint8)
                         else:
                             merged_image[i, j] = imA[i, j]
                     elif not np.all(imB[i, j] == [0, 0, 0]):
@@ -244,32 +306,18 @@ class BirdEyeSystem:
                     else:
                         merged_image[i, j] = imB[i, j]
 
+                if showLines:
+                    if i == y_linear2:
+                        merged_image[i, j] = [255, 0, 0]
 
-        return merged_image
-
-
-    def AverageMergeTwoImagexx(self, imA, imB, m1, b1, m2, b2):
-        # Initialize an array with the same dimensions as imA
-        merged_image = np.zeros_like(imA)
-
-        for i in range(imA.shape[0]):
-            for j in range(imA.shape[1]):
-                #calculate the y positions on the two lines
-                y_linear1 = int(m1 * j + b1)
-                y_linear2 = int(m2 * j + b2)
-
-                if i == y_linear2:
-                    merged_image[i, j] = [255, 0, 0]
-
-                elif i == y_linear1:
-                    merged_image[i, j] = [0, 255, 0]
+                    elif i == y_linear1:
+                        merged_image[i, j] = [0, 255, 0]
 
         return merged_image
 
 
     def AddCar(self):
-
-        self.carImage = cv2.resize(self.carImage, (xr - xl, yb - yt))
+        self.carImage = cv2.resize(self.carImage, (xr - xl + mirrorExtra*2, yb - yt))
         np.copyto(self.crop_by_direction("C"), self.carImage)
 
     def crop_image(self, image, crop_type):
@@ -302,26 +350,46 @@ class BirdEyeSystem:
 
 def main():
 
+
+    global isNeedToSave
+    global applyLuminance
+    global showLines
+
+
     parser = argparse.ArgumentParser()
     parser.add_argument("-undistore", action="store_true", help="")
     parser.add_argument("-projection", action="store_true", help="")
     parser.add_argument("-topView", action="store_true", help="")
+    parser.add_argument("-applyLuminance", action="store_true", help="", default=False)
+    parser.add_argument("-showLines", action="store_true", help="", default=False)
+    parser.add_argument("-save", action="store_true", help="", default=False)
+    parser.add_argument("-luminance", action="store_true", help="", default=False)
 
     args = parser.parse_args()
     BirdEyeSystemOBJ = BirdEyeSystem()
 
 
+    if args.save:
+        isNeedToSave=True
+
     if args.projection:
         print("running projection")
-        BirdEyeSystemOBJ.ProjectParkingCameras(isNeedToSave=True)
+        BirdEyeSystemOBJ.ProjectParkingCameras()
 
     elif args.undistore:
         print("running undistortionParkingCameras")
-        BirdEyeSystemOBJ.UndistoreParkingCameras(isNeedToSave=True)
+        BirdEyeSystemOBJ.UndistoreParkingCameras()
 
     elif args.topView:
+
+        if args.luminance:
+            applyLuminance = True
+        if args.showLines:
+           showLines = True
+
         print("running topView")
-        BirdEyeSystemOBJ.TopView(isNeedToSave=True, applyLuminance=True)
+        BirdEyeSystemOBJ.TopView()
+
 
 if __name__ == "__main__":
 
